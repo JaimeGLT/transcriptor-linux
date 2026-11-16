@@ -1,4 +1,4 @@
-"""Interfaz gráfica de Transcriptor MP4."""
+"""Interfaz gráfica del transcriptor local de audio y video."""
 
 from pathlib import Path
 import queue
@@ -9,9 +9,9 @@ from tkinter import filedialog, messagebox, ttk
 
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-from .core import save_transcript, validate_video_paths
+from .core import save_transcript, validate_media_paths
 from .engine import TranscriptionCancelled, WhisperEngine
-from .native_dialogs import choose_directory, choose_video_files, kdialog_path
+from .native_dialogs import choose_directory, choose_media_files, kdialog_path
 from .theme import apply_theme
 from .user_paths import parse_dropped_paths, preferred_user_folder
 
@@ -60,10 +60,10 @@ class TranscriberApp(ttk.Frame):
         self.model_help_var = tk.StringVar(value=MODEL_HELP[self.model_var.get()])
         self.language_var = tk.StringVar(value="Detectar automáticamente")
         self.output_mode_var = tk.StringVar(value="source")
-        self.destination_var = tk.StringVar(value="Se guardará junto a cada video")
+        self.destination_var = tk.StringVar(value="Se guardará junto a cada archivo")
         self.txt_var = tk.BooleanVar(value=True)
         self.srt_var = tk.BooleanVar(value=True)
-        self.file_summary_var = tk.StringVar(value="Sin videos")
+        self.file_summary_var = tk.StringVar(value="Sin archivos")
         self.status_var = tk.StringVar(value="Listo para comenzar")
         self.progress_text_var = tk.StringVar(value="0%")
 
@@ -72,7 +72,7 @@ class TranscriberApp(ttk.Frame):
 
     def _build(self) -> None:
         self.grid(sticky="nsew")
-        self.master.title("Transcriptor MP4")
+        self.master.title("Transcriptor")
         self.master.geometry("900x760")
         self.master.minsize(760, 650)
         self.master.columnconfigure(0, weight=1)
@@ -81,7 +81,7 @@ class TranscriberApp(ttk.Frame):
         self.rowconfigure(1, weight=1)
 
         self._build_header()
-        self._build_video_card()
+        self._build_media_card()
         self._build_options_card()
         self._build_footer()
 
@@ -89,12 +89,12 @@ class TranscriberApp(ttk.Frame):
         header = ttk.Frame(self, style="Header.TFrame", padding=(26, 18))
         header.grid(row=0, column=0, sticky="ew")
         header.columnconfigure(0, weight=1)
-        ttk.Label(header, text="Transcriptor MP4", style="HeaderTitle.TLabel").grid(
+        ttk.Label(header, text="Transcriptor", style="HeaderTitle.TLabel").grid(
             row=0, column=0, sticky="w"
         )
         ttk.Label(
             header,
-            text="Convierte clases y videos en texto y subtítulos.",
+            text="Convierte audios, notas de voz y videos en texto y subtítulos.",
             style="HeaderSubtitle.TLabel",
         ).grid(row=1, column=0, sticky="w", pady=(2, 0))
         ttk.Label(
@@ -103,7 +103,7 @@ class TranscriberApp(ttk.Frame):
             style="Privacy.TLabel",
         ).grid(row=0, column=1, rowspan=2, sticky="e")
 
-    def _build_video_card(self) -> None:
+    def _build_media_card(self) -> None:
         card = ttk.Frame(self, style="Card.TFrame", padding=18)
         card.grid(row=1, column=0, sticky="nsew", padx=22, pady=(18, 10))
         card.columnconfigure(0, weight=1)
@@ -112,7 +112,7 @@ class TranscriberApp(ttk.Frame):
         top = ttk.Frame(card, style="Surface.TFrame")
         top.grid(row=0, column=0, sticky="ew", pady=(0, 12))
         top.columnconfigure(0, weight=1)
-        ttk.Label(top, text="1  Videos", style="CardTitle.TLabel").grid(
+        ttk.Label(top, text="1  Audios y videos", style="CardTitle.TLabel").grid(
             row=0, column=0, sticky="w"
         )
         ttk.Label(top, textvariable=self.file_summary_var, style="Muted.TLabel").grid(
@@ -120,7 +120,7 @@ class TranscriberApp(ttk.Frame):
         )
         self.select_button = ttk.Button(
             top,
-            text="Seleccionar videos…",
+            text="Seleccionar archivos…",
             style="Primary.TButton",
             command=self._select_files,
         )
@@ -151,7 +151,10 @@ class TranscriberApp(ttk.Frame):
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.empty_label = ttk.Label(
             table_frame,
-            text="Arrastra tus videos MP4 aquí\n\no pulsa “Seleccionar videos…”",
+            text=(
+                "Arrastra aquí tus audios o videos\n\n"
+                "MP3 · OGG · OPUS · M4A · WAV · MP4"
+            ),
             style="Empty.TLabel",
             anchor="center",
             justify="center",
@@ -169,7 +172,7 @@ class TranscriberApp(ttk.Frame):
         actions.columnconfigure(0, weight=1)
         ttk.Label(
             actions,
-            text="Puedes seleccionar varios archivos a la vez.",
+            text="Compatible con notas de voz de WhatsApp y varios archivos a la vez.",
             style="Muted.TLabel",
         ).grid(row=0, column=0, sticky="w")
         self.remove_button = ttk.Button(
@@ -230,7 +233,7 @@ class TranscriberApp(ttk.Frame):
         output_row.columnconfigure(2, weight=1)
         self.source_radio = ttk.Radiobutton(
             output_row,
-            text="Junto a cada video",
+            text="Junto a cada archivo",
             variable=self.output_mode_var,
             value="source",
             style="Surface.TRadiobutton",
@@ -328,20 +331,26 @@ class TranscriberApp(ttk.Frame):
     def _select_files(self) -> None:
         native = kdialog_path()
         if native:
-            selected = choose_video_files(self.downloads, kdialog=native)
+            selected = choose_media_files(self.downloads, kdialog=native)
         else:
             selected = [
                 Path(item)
                 for item in filedialog.askopenfilenames(
-                    title="Seleccionar videos para transcribir",
+                    title="Seleccionar audios o videos para transcribir",
                     initialdir=str(self.downloads),
-                    filetypes=[("Videos MP4", "*.mp4 *.MP4")],
+                    filetypes=[
+                        (
+                            "Audio y video",
+                            "*.mp4 *.MP4 *.mp3 *.MP3 *.ogg *.OGG *.opus *.OPUS "
+                            "*.m4a *.M4A *.wav *.WAV *.aac *.AAC *.flac *.FLAC",
+                        )
+                    ],
                 )
             ]
         self._add_paths(selected)
 
     def _add_paths(self, paths: list[Path]) -> None:
-        valid, invalid = validate_video_paths(paths)
+        valid, invalid = validate_media_paths(paths)
         for path in valid:
             if path not in self.files:
                 self.files.append(path)
@@ -349,7 +358,7 @@ class TranscriberApp(ttk.Frame):
         if invalid:
             messagebox.showwarning(
                 "Archivos omitidos",
-                "Solo se pueden agregar archivos MP4 existentes.",
+                "El archivo no es un audio o video compatible.",
             )
 
     def _refresh_file_table(self) -> None:
@@ -369,13 +378,13 @@ class TranscriberApp(ttk.Frame):
             )
         count = len(self.files)
         if count:
-            self.file_summary_var.set(f"{count} video(s) · {human_size(total_size)} en total")
-            self.status_var.set("Videos listos para transcribir")
+            self.file_summary_var.set(f"{count} archivo(s) · {human_size(total_size)} en total")
+            self.status_var.set("Archivos listos para transcribir")
             self.empty_label.place_forget()
             self.clear_button.configure(state="normal" if not self.running else "disabled")
         else:
-            self.file_summary_var.set("Sin videos")
-            self.status_var.set("Selecciona o arrastra uno o varios videos MP4")
+            self.file_summary_var.set("Sin archivos")
+            self.status_var.set("Selecciona o arrastra audios y videos")
             self.empty_label.place(relx=0.5, rely=0.55, anchor="center", relwidth=0.82)
             self.clear_button.configure(state="disabled")
         self._update_remove_button()
@@ -415,7 +424,7 @@ class TranscriberApp(ttk.Frame):
         custom = self.output_mode_var.get() == "custom" and not self.running
         self.choose_button.configure(state="normal" if custom else "disabled")
         if self.output_mode_var.get() == "source":
-            self.destination_var.set("Se guardará junto a cada video")
+            self.destination_var.set("Se guardará junto a cada archivo")
         elif self.custom_output_folder is None:
             self.destination_var.set("Selecciona una carpeta")
         else:
@@ -440,7 +449,7 @@ class TranscriberApp(ttk.Frame):
 
     def _start(self) -> None:
         if not self.files:
-            messagebox.showinfo("Faltan videos", "Selecciona al menos un video MP4.")
+            messagebox.showinfo("Faltan archivos", "Selecciona al menos un audio o video.")
             return
         if not self.txt_var.get() and not self.srt_var.get():
             messagebox.showinfo("Falta formato", "Marca Texto, Subtítulos o ambos.")
@@ -513,7 +522,7 @@ class TranscriberApp(ttk.Frame):
                         f"Guardado {', '.join(path.name for path in created)} · idioma {detected}",
                     )
                 )
-            self.events.put(("done", f"{total} video(s) transcrito(s) correctamente."))
+            self.events.put(("done", f"{total} archivo(s) transcrito(s) correctamente."))
         except TranscriptionCancelled:
             self.events.put(("cancelled", "Transcripción cancelada."))
         except Exception as error:

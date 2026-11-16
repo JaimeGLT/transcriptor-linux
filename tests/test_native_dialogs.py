@@ -2,11 +2,11 @@ from pathlib import Path
 from types import SimpleNamespace
 import unittest
 
-from transcriptor.native_dialogs import choose_directory, choose_video_files
+from transcriptor.native_dialogs import choose_directory, choose_media_files
 
 
 class NativeDialogsTests(unittest.TestCase):
-    def test_video_picker_uses_kde_native_multiple_file_dialog(self):
+    def test_media_picker_uses_kde_native_multiple_file_dialog(self):
         calls: list[list[str]] = []
 
         def run(command, **_options):
@@ -17,7 +17,7 @@ class NativeDialogsTests(unittest.TestCase):
                 "/home/persona/Descargas/dos.MP4\n",
             )
 
-        selected = choose_video_files(
+        selected = choose_media_files(
             Path("/home/persona/Descargas"),
             kdialog="/usr/bin/kdialog",
             runner=run,
@@ -33,13 +33,17 @@ class NativeDialogsTests(unittest.TestCase):
         self.assertIn("--multiple", calls[0])
         self.assertIn("--separate-output", calls[0])
         self.assertIn("--getopenfilename", calls[0])
+        file_filter = next(item for item in calls[0] if "*.mp4" in item)
+        self.assertIn("*.mp3", file_filter)
+        self.assertIn("*.ogg", file_filter)
+        self.assertIn("*.opus", file_filter)
 
-    def test_video_picker_returns_empty_selection_when_cancelled(self):
+    def test_media_picker_returns_empty_selection_when_cancelled(self):
         def run(_command, **_options):
             return SimpleNamespace(returncode=1, stdout="")
 
         self.assertEqual(
-            choose_video_files(Path.home(), kdialog="kdialog", runner=run),
+            choose_media_files(Path.home(), kdialog="kdialog", runner=run),
             [],
         )
 

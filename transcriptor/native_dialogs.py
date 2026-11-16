@@ -8,13 +8,17 @@ from typing import Any
 
 
 Runner = Callable[..., Any]
+MEDIA_NAME_FILTER = (
+    "Audio y video (*.mp4 *.MP4 *.mp3 *.MP3 *.ogg *.OGG *.opus *.OPUS "
+    "*.m4a *.M4A *.wav *.WAV *.aac *.AAC *.flac *.FLAC)"
+)
 
 
 def kdialog_path() -> str | None:
     return shutil.which("kdialog")
 
 
-def choose_video_files(
+def choose_media_files(
     initial_directory: Path,
     *,
     kdialog: str,
@@ -24,10 +28,10 @@ def choose_video_files(
         [
             kdialog,
             "--title",
-            "Seleccionar videos para transcribir",
+            "Seleccionar audios o videos para transcribir",
             "--getopenfilename",
             str(initial_directory),
-            "Videos MP4 (*.mp4 *.MP4)",
+            MEDIA_NAME_FILTER,
             "--multiple",
             "--separate-output",
         ],
