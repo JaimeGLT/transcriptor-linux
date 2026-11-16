@@ -11,10 +11,12 @@ equipo y guarda los resultados junto al video o en la carpeta que elijas.
 ## Uso
 
 1. Abre **Transcriptor MP4** desde el Escritorio.
-2. Arrastra uno o varios MP4 sobre la zona de videos, o usa los accesos directos
-   **Descargas**, **Videos** y **Escritorio**.
+2. Arrastra uno o varios MP4 sobre la zona de videos, o pulsa
+   **Seleccionar videos** para usar el explorador nativo de KDE.
 3. Elige modelo, idioma y formatos de salida.
-4. Pulsa **Transcribir**.
+4. Decide si los resultados se guardan junto a cada video o en otra carpeta.
+5. Pulsa **Transcribir**. Al terminar puedes abrir directamente la carpeta de
+   resultados.
 
 La primera transcripción descarga el modelo seleccionado. El modelo rápido
 ocupa aproximadamente 460 MB; los modelos más precisos necesitan más espacio,
