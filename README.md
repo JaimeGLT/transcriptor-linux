@@ -11,7 +11,8 @@ equipo y guarda los resultados junto al video o en la carpeta que elijas.
 ## Uso
 
 1. Abre **Transcriptor MP4** desde el Escritorio.
-2. Agrega uno o varios archivos MP4.
+2. Arrastra uno o varios MP4 sobre la zona de videos, o usa los accesos directos
+   **Descargas**, **Videos** y **Escritorio**.
 3. Elige modelo, idioma y formatos de salida.
 4. Pulsa **Transcribir**.
 
