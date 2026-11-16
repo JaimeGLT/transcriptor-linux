@@ -27,10 +27,11 @@ def build_text(segments: Iterable[Segment]) -> str:
 
 def build_srt(segments: Iterable[Segment]) -> str:
     blocks: list[str] = []
-    for index, segment in enumerate(segments, start=1):
+    for segment in segments:
         text = segment.text.strip()
         if not text:
             continue
+        index = len(blocks) + 1
         blocks.append(
             f"{index}\n"
             f"{format_srt_timestamp(segment.start)} --> "

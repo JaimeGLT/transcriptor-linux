@@ -34,6 +34,19 @@ class CoreTests(unittest.TestCase):
             "2\n00:00:01,500 --> 00:00:03,000\nSegunda línea.\n",
         )
 
+    def test_srt_numbers_remain_consecutive_when_a_segment_is_empty(self):
+        segments = [
+            Segment(0.0, 1.0, "Primero"),
+            Segment(1.0, 2.0, "   "),
+            Segment(2.0, 3.0, "Segundo"),
+        ]
+
+        self.assertEqual(
+            build_srt(segments),
+            "1\n00:00:00,000 --> 00:00:01,000\nPrimero\n\n"
+            "2\n00:00:02,000 --> 00:00:03,000\nSegundo\n",
+        )
+
     def test_output_paths_can_use_source_or_custom_directory(self):
         source = Path("/videos/clase.mp4")
         self.assertEqual(
