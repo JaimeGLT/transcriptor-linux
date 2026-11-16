@@ -11,7 +11,9 @@ if [[ ! -x "${UV_BIN}" ]]; then
 fi
 
 echo "Preparando Transcriptor MP4…"
-"${UV_BIN}" venv --python 3.12 "${APP_DIR}/.venv"
+if [[ ! -x "${APP_DIR}/.venv/bin/python" ]]; then
+    "${UV_BIN}" venv --python 3.12 "${APP_DIR}/.venv"
+fi
 "${UV_BIN}" pip install \
     --python "${APP_DIR}/.venv/bin/python" \
     --requirement "${APP_DIR}/requirements.txt"
