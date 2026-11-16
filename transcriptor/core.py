@@ -5,6 +5,11 @@ from pathlib import Path
 from typing import Iterable
 
 
+SUPPORTED_MEDIA_EXTENSIONS = frozenset(
+    {".mp4", ".mp3", ".ogg", ".opus", ".m4a", ".wav", ".aac", ".flac"}
+)
+
+
 @dataclass(frozen=True)
 class Segment:
     start: float
@@ -46,15 +51,18 @@ def output_paths(source: Path, destination: Path | None = None) -> tuple[Path, P
     return folder / f"{source.stem}.txt", folder / f"{source.stem}.srt"
 
 
-def validate_video_paths(paths: Iterable[Path]) -> tuple[list[Path], list[Path]]:
+def validate_media_paths(paths: Iterable[Path]) -> tuple[list[Path], list[Path]]:
     valid: list[Path] = []
     invalid: list[Path] = []
     for path in paths:
-        if path.is_file() and path.suffix.lower() == ".mp4":
+        if path.is_file() and path.suffix.lower() in SUPPORTED_MEDIA_EXTENSIONS:
             valid.append(path)
         else:
             invalid.append(path)
     return valid, invalid
+
+
+validate_video_paths = validate_media_paths
 
 
 def save_transcript(

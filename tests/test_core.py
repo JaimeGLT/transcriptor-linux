@@ -8,6 +8,7 @@ from transcriptor.core import (
     build_text,
     format_srt_timestamp,
     output_paths,
+    validate_media_paths,
     validate_video_paths,
 )
 
@@ -70,6 +71,27 @@ class CoreTests(unittest.TestCase):
 
             self.assertEqual(valid, [video])
             self.assertEqual(invalid, [text, folder / "falta.mp4"])
+
+    def test_media_validation_accepts_whatsapp_and_common_audio_formats(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            folder = Path(temp_dir)
+            supported = [
+                folder / "nota.mp3",
+                folder / "voz-whatsapp.ogg",
+                folder / "voz-whatsapp.opus",
+                folder / "grabacion.m4a",
+                folder / "entrevista.wav",
+                folder / "audio.aac",
+                folder / "archivo.flac",
+            ]
+            unsupported = folder / "documento.pdf"
+            for path in [*supported, unsupported]:
+                path.touch()
+
+            valid, invalid = validate_media_paths([*supported, unsupported])
+
+            self.assertEqual(valid, supported)
+            self.assertEqual(invalid, [unsupported])
 
 
 if __name__ == "__main__":
