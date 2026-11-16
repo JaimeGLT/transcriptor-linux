@@ -9,7 +9,6 @@ from transcriptor.core import (
     format_srt_timestamp,
     output_paths,
     validate_media_paths,
-    validate_video_paths,
 )
 
 
@@ -59,7 +58,7 @@ class CoreTests(unittest.TestCase):
             (Path("/salida/clase.txt"), Path("/salida/clase.srt")),
         )
 
-    def test_validation_accepts_existing_mp4_and_rejects_other_entries(self):
+    def test_validation_accepts_existing_media_and_rejects_other_entries(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             folder = Path(temp_dir)
             video = folder / "clase.MP4"
@@ -67,7 +66,7 @@ class CoreTests(unittest.TestCase):
             video.touch()
             text.touch()
 
-            valid, invalid = validate_video_paths([video, text, folder / "falta.mp4"])
+            valid, invalid = validate_media_paths([video, text, folder / "falta.mp4"])
 
             self.assertEqual(valid, [video])
             self.assertEqual(invalid, [text, folder / "falta.mp4"])

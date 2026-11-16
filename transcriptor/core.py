@@ -61,10 +61,6 @@ def validate_media_paths(paths: Iterable[Path]) -> tuple[list[Path], list[Path]]
             invalid.append(path)
     return valid, invalid
 
-
-validate_video_paths = validate_media_paths
-
-
 def save_transcript(
     source: Path,
     segments: Iterable[Segment],

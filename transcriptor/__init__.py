@@ -1,1 +1,1 @@
-"""Transcriptor MP4: transcripción local de videos."""
+"""Transcripción local de audios, notas de voz y videos."""

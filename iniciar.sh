@@ -6,7 +6,7 @@ PYTHON_BIN="${APP_DIR}/.venv/bin/python"
 
 if [[ ! -x "${PYTHON_BIN}" ]]; then
     zenity --question \
-        --title="Instalar Transcriptor MP4" \
+        --title="Instalar Transcriptor" \
         --text="La aplicación necesita una instalación inicial. ¿Abrir el instalador ahora?" \
         --ok-label="Instalar" --cancel-label="Cancelar" || exit 0
     konsole --hold -e bash "${APP_DIR}/instalar.sh"

@@ -10,7 +10,7 @@ if [[ ! -x "${UV_BIN}" ]]; then
     exit 1
 fi
 
-echo "Preparando Transcriptor MP4…"
+echo "Preparando Transcriptor…"
 if [[ ! -x "${APP_DIR}/.venv/bin/python" ]]; then
     "${UV_BIN}" venv --python 3.12 "${APP_DIR}/.venv"
 fi
@@ -19,4 +19,4 @@ fi
     --requirement "${APP_DIR}/requirements.txt"
 
 echo
-echo "Instalación terminada. Ya puedes abrir 'Transcriptor MP4' desde el Escritorio."
+echo "Instalación terminada. Ya puedes abrir 'Transcriptor' desde el Escritorio."
